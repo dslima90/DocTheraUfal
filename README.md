@@ -6,7 +6,7 @@
     - [Comando: abu\_click](#comando-abu_click)
   - [Comandos da tela de trabalho](#comandos-da-tela-de-trabalho)
     - [Comando: w\_powersel](#comando-w_powersel)
-    - [Comando: pulsesel](#comando-pulsesel)
+    - [Comando: w\_pulsesel](#comando-w_pulsesel)
     - [Comando: w\_dialogread](#comando-w_dialogread)
 
 
@@ -158,7 +158,7 @@ Só é permitido o ajuste de potência se a tela de ajuste estiver visível, por
 <-| b'<ERR CTX>\n' 
 ```
 
-### Comando: pulsesel
+### Comando: w_pulsesel
 
 **Descrição**
 
@@ -170,8 +170,8 @@ Pode ser utilizado para abrir ou fechar a tela de ajuste de pulso e modificar o 
 ```
     w_pulsesel call
     w_pulsesel set <mode>
-    w_pulsesel set 1 [time_active] [period]
-    w_pulsesel set 2 [time]
+    w_pulsesel set 1 [time_active] [period] # modo pulsado
+    w_pulsesel set 2 [time]                 # modo puls. único
     w_pulsesel close
 ```
 
