@@ -1,30 +1,41 @@
-- [Comandos para integração com o Thera Lase Surgery](#comandos-para-integração-com-o-thera-lase-surgery)
-  - [Comandos do gerenciador de atividades](#comandos-do-gerenciador-de-atividades)
-    - [Comando: am\_ctx](#comando-am_ctx)
-  - [Comandos de simulação de toque](#comandos-de-simulação-de-toque)
-    - [Comando: abu\_read](#comando-abu_read)
-    - [Comando: abu\_click](#comando-abu_click)
-  - [Comandos da tela de trabalho](#comandos-da-tela-de-trabalho)
-    - [Comando: w\_powersel](#comando-w_powersel)
-    - [Comando: w\_pulsesel](#comando-w_pulsesel)
-    - [Comando: w\_dialogread](#comando-w_dialogread)
+- [Manual de integração com o Thera Lase Surgery](#manual-de-integração-com-o-thera-lase-surgery)
+  - [Comandos](#comandos)
+    - [Comandos do gerenciador de atividades](#comandos-do-gerenciador-de-atividades)
+      - [Comando: am\_ctx](#comando-am_ctx)
+    - [Comandos de simulação de toque](#comandos-de-simulação-de-toque)
+      - [Comando: abu\_read](#comando-abu_read)
+      - [Comando: abu\_click](#comando-abu_click)
+    - [Comandos da tela de trabalho](#comandos-da-tela-de-trabalho)
+      - [Comando: w\_powersel](#comando-w_powersel)
+      - [Comando: w\_pulsesel](#comando-w_pulsesel)
+      - [Comando: w\_dialogread](#comando-w_dialogread)
+  - [Eventos](#eventos)
+    - [Evento: CTX\_CHG](#evento-ctx_chg)
+    - [Evento: BTN\_CLK](#evento-btn_clk)
+    - [Evento: PAR\_EDT](#evento-par_edt)
+    - [Evento: PAR\_CHG](#evento-par_chg)
+    - [Evento: LSR\_CHG](#evento-lsr_chg)
 
 
-# Comandos para integração com o Thera Lase Surgery
+# Manual de integração com o Thera Lase Surgery
 
-Aqui estão documentados alguns comandos uart que podem ser úteis na integração com o Thera Lase Surgery. Para utilizá-los, ajustar a uart com Baud Rate em 833333, 8 bits, sem paridade e um stop bit. (833333,8,N,1)
+Aqui estão documentados alguns comandos e eventos uart que podem ser úteis na integração com o Thera Lase Surgery. Para utilizá-los, ajustar a uart com Baud Rate em 833333, 8 bits, sem paridade e um stop bit. (833333,8,N,1)
+
+Durante a execução, o equipamento pode enviar algumas mensagens de debug, todas elas são iniciadas por "!<COD_3_LETRAS>". Essa mensagens devem ser descartadas pelo parser na hora de validar a resposta de um comando.
+
+Toda a documentação contida aqui se refere a versão do kernel *1.2.1*.
+
+## Comandos
 
 Para enviar um comando para o equipamento basta transmitir a palavra de comando seguida do linefeed ('\n').
 
 Todas as repostas aos comandos são iniciadas por "<" e finalizadas por ">". Caso a resposta ocupe múltiplas linhas, é adicionado um * ao início de cada linha. 
 
-Durante a execução, o equipamento pode enviar algumas mensagens de debug, todas elas são iniciadas por "!<COD_3_LETRAS>". Essa mensagens devem ser descartadas pelo parser na hora de validar a resposta de um comando.
-
 Todos os comandos documentados aqui acompanham exemplos que incluem os exatos *bytestrings* enviados e recebidos na comunicação. Os enviados estão precedidos pelo símbolo "->|" e os recebidos por "<-|". Além disso, como familiar para os programadores de python, as *bytestrings* estão entre aspas simples precedidas por um b.
 
-## Comandos do gerenciador de atividades
+### Comandos do gerenciador de atividades
 
-### Comando: am_ctx
+#### Comando: am_ctx
 
 **Descrição**
 
@@ -60,11 +71,11 @@ Alguns nomes de contextos que podem ser relevantes:
 <-| b'*>\n' 
 ```
 
-## Comandos de simulação de toque
+### Comandos de simulação de toque
 
 Esses comandos tem objetivo de simular o toque do usuário na tela, possibilitando a automatização da navegação entre as telas. 
 
-### Comando: abu_read
+#### Comando: abu_read
 
 **Descrição**
     Retorna a lista dos botões habilitados para toque na tela TouchScreen do equipamento.
@@ -96,7 +107,7 @@ O touchid é a variável que deve ser utilizada no comando abu_click
 <-| b'*>\n' 
 ```
 
-### Comando: abu_click
+#### Comando: abu_click
 
 **Descrição**
 
@@ -120,9 +131,9 @@ Status do comando
 <-| b'<OK>\n' 
 ```
 
-## Comandos da tela de trabalho
+### Comandos da tela de trabalho
 
-### Comando: w_powersel
+#### Comando: w_powersel
 
 **Descrição**
 
@@ -158,7 +169,7 @@ Só é permitido o ajuste de potência se a tela de ajuste estiver visível, por
 <-| b'<ERR CTX>\n' 
 ```
 
-### Comando: w_pulsesel
+#### Comando: w_pulsesel
 
 **Descrição**
 
@@ -218,7 +229,7 @@ Pode ser utilizado para abrir ou fechar a tela de ajuste de pulso e modificar o 
 <-| b'<OK 2 6000>\n' 
 ```
 
-### Comando: w_dialogread
+#### Comando: w_dialogread
 
 **Descrição**
 
@@ -242,4 +253,148 @@ Caso uma subtela de mensagem ou alerta esteja visível na tela, retorna a mensag
 <-| b'*Fibra \xf3ptica detectada!\n' 
 <-| b'*Fibra conectada at\xe9 o fim de curso?\n' 
 <-| b'*>\n' 
+```
+
+
+## Eventos
+
+Os eventos são mensagens enviadas pelo equipamento que indicam alguma mudança no estado interno do equipamento a fim de sincronizar as duas interfaces. Todos os eventos enviados são precedidos pelo simbolo '+' seguido de 7 caracteres com o nome do evento, um ou mais parametros separados por espaço podem vir em seguida e são finalizados por um linefeed '\n'. 
+
+Segue a descrição de alguns eventos que podem ser detectados:
+
+### Evento: CTX_CHG
+
+**Descrição**
+
+Indica uma mudança de contexto, que pode ser uma mudança de tela ou aparecimento uma tela flutuante.
+
+**Formato** 
+
+```
++CTX_CHG <CONTEXTO_ANTERIOR> <CONTEXTO_ATUAL> <CONTEXTO_NESTED>
+```
+
+Contexto nested indica uma tela flutuante, o valor NULL no lugar desse parâmetro indica inexistencia de uma.
+
+**Exemplos** 
+
+```
+<-| b'+CHG_CTX NULL presentation NULL\n'
+<-| b'+CHG_CTX presentation password NULL\n'
+<-| b'+CHG_CTX password mainmenu NULL\n' 
+<-| b'+CHG_CTX mainmenu modesel NULL\n' 
+<-| b'+CHG_CTX modesel work NULL\n' 
+<-| b'+CHG_CTX modesel work dialog\n' 
+```
+
+### Evento: BTN_CLK
+
+**Descrição**
+
+Indica um evento de click em um botão.
+
+**Formato** 
+
+```
++BTN_CLK <CONTEXTO> <TOUCH_ID> <TIPO_EVENTO>
+```
+
+Sendo que:
+
+- CONTEXTO: indica o contexto em que o botão foi clicado
+- TOUCH_ID: Touch id do botão, único, tal como retornado por abu_read
+- TIPO_EVENTO: 4 indica que o botão foi pressionado, 3 indica que o botão foi solto.
+
+**Exemplos** 
+
+Colocação da senha: 2276
+
+```
+<-| b'+BTN_CLK password 191044 4\n' 
+<-| b'+BTN_CLK password 191044 3\n' 
+<-| b'+BTN_CLK password 191044 4\n' 
+<-| b'+BTN_CLK password 191044 3\n' 
+<-| b'+BTN_CLK password 334314 4\n' 
+<-| b'+BTN_CLK password 334314 3\n' 
+<-| b'+BTN_CLK password 262814 4\n' 
+<-| b'+BTN_CLK password 262814 3\n' 
+```
+
+### Evento: PAR_EDT
+
+**Descrição**
+
+Indica se o equipamento mudou o seu estado para o modo de edição de parametros e 
+
+**Formato** 
+
+```
++PAR_EDT <ESTADO> [MODO] 
+```
+
+- ESTADO: 1 indica que está em modo de edição, 0 indica que saiu do modo de edição
+- MODO: Modo indica qual o modo de edição atual, pode ser "TOUCH" ou "GLASS", indicado apenas quando o equipamento está entrando no modo de edição
+
+**Exemplos** 
+
+
+```
+<-| b'+PAR_EDT 1 TOUCH\n'
+<-| b'+PAR_EDT 0\n' 
+```
+
+
+### Evento: PAR_CHG
+
+**Descrição**
+
+Indica que algum parametro de ajuste do laser foi modificado. 
+
+**Formato** 
+
+
+```
++PAR_CHG <POTENCIA> <MODO_PULSO> [<PARAMETROS_PULSO>]
+```
+
+- POTENCIA: Potencia ajustada, no mesmo formato de w_powersel
+- MODO_PULSO: Modo de pulso ajustado, no mesmo formato de w_pulsesel
+- PARAMETROS_PULSO: Apenas se o modo for pulsado ou pulso único, segue o modelo de w_pulsesel
+
+
+**Exemplos** 
+
+
+```
+<-| b'+PAR_CHG 20 0\n' 
+<-| b'+PAR_CHG 20 1 250 50\n' 
+<-| b'+PAR_CHG 20 2 500\n' 
+```
+
+### Evento: LSR_CHG
+
+**Descrição**
+
+Indica uma mudança no estado do laser. Esse evento é anunciado sempre que o estado de prontidão/disponível é modificado ou que o laser é acionado ou desacionado. Além disso, quando o laser está acionado, ele indica a modificação no tempo de acionamento a cada 500 ms.
+
+**Formato** 
+
+```
++LSR_CHG <VALOR> <TEMPO>
+```
+
+- VALOR: Valor atual do estado do laser 0 = prontidão, 1 = disponível, 2 = acionado
+- TEMPO: Tempo em segundos de acionamento do laser.
+
+**Exemplos** 
+
+
+```
+<-| b'+LSR_CHG 0 0.000000\n' 
+<-| b'+LSR_CHG 1 0.000000\n' 
+<-| b'+LSR_CHG 0 0.000000\n' 
+<-| b'+LSR_CHG 1 0.000000\n' 
+<-| b'+LSR_CHG 2 0.000000\n' 
+<-| b'+LSR_CHG 2 0.000000\n' 
+<-| b'+LSR_CHG 1 0.000000\n' 
 ```
