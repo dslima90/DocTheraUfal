@@ -9,6 +9,7 @@
       - [Comando: w\_powersel](#comando-w_powersel)
       - [Comando: w\_pulsesel](#comando-w_pulsesel)
       - [Comando: w\_dialogread](#comando-w_dialogread)
+      - [Comando: w\_resette](#comando-w_resette)
   - [Eventos](#eventos)
     - [Evento: CTX\_CHG](#evento-ctx_chg)
     - [Evento: BTN\_CLK](#evento-btn_clk)
@@ -23,7 +24,7 @@ Aqui estão documentados alguns comandos e eventos uart que podem ser úteis na 
 
 Durante a execução, o equipamento pode enviar algumas mensagens de debug, todas elas são iniciadas por "!<COD_3_LETRAS>". Essa mensagens devem ser descartadas pelo parser na hora de validar a resposta de um comando.
 
-Toda a documentação contida aqui se refere a versão do kernel *1.2.1*.
+Toda a documentação contida aqui se refere a versão do kernel *1.2.2*.
 
 ## Comandos
 
@@ -255,7 +256,28 @@ Caso uma subtela de mensagem ou alerta esteja visível na tela, retorna a mensag
 <-| b'*>\n' 
 ```
 
+#### Comando: w_resette
 
+**Descrição**
+
+Zera o tempo e energia.
+
+**Uso:**
+
+```
+    w_resette
+```
+
+**Retorno:** 
+
+Ok ou erro de contexto.
+
+**Exemplo**
+
+```
+->| b'w_resette\n' 
+<-| b'<OK>\n' 
+```
 ## Eventos
 
 Os eventos são mensagens enviadas pelo equipamento que indicam alguma mudança no estado interno do equipamento a fim de sincronizar as duas interfaces. Todos os eventos enviados são precedidos pelo simbolo '+' seguido de 7 caracteres com o nome do evento, um ou mais parametros separados por espaço podem vir em seguida e são finalizados por um linefeed '\n'. 
@@ -380,21 +402,30 @@ Indica uma mudança no estado do laser. Esse evento é anunciado sempre que o es
 **Formato** 
 
 ```
-+LSR_CHG <VALOR> <TEMPO>
++LSR_CHG <VALOR> <TEMPO> <ENERGIA>
 ```
 
 - VALOR: Valor atual do estado do laser 0 = prontidão, 1 = disponível, 2 = acionado
-- TEMPO: Tempo em segundos de acionamento do laser.
+- TEMPO: Tempo total em segundos de acionamento do laser.
+- ENERGIA: Energia total de acionamento do laser.
 
 **Exemplos** 
 
 
 ```
-<-| b'+LSR_CHG 0 0.000000\n' 
-<-| b'+LSR_CHG 1 0.000000\n' 
-<-| b'+LSR_CHG 0 0.000000\n' 
-<-| b'+LSR_CHG 1 0.000000\n' 
-<-| b'+LSR_CHG 2 0.000000\n' 
-<-| b'+LSR_CHG 2 0.000000\n' 
-<-| b'+LSR_CHG 1 0.000000\n' 
+<-| b'+LSR_CHG 0 0.000000 0.000000\n' 
+<-| b'+LSR_CHG 1 0.000000 0.000000\n' 
+<-| b'+LSR_CHG 0 0.000000 0.000000\n' 
+<-| b'+LSR_CHG 1 0.000000 0.000000\n' 
+<-| b'+LSR_CHG 2 0.346400 0.173200\n' 
+<-| b'+LSR_CHG 2 0.613900 0.306950\n' 
+<-| b'+LSR_CHG 2 0.881400 0.440700\n' 
+<-| b'+LSR_CHG 2 1.198900 0.599450\n' 
+<-| b'+LSR_CHG 2 1.416400 0.708200\n' 
+<-| b'+LSR_CHG 2 1.724900 0.862450\n' 
+<-| b'+LSR_CHG 2 1.974900 0.987450\n' 
+<-| b'+LSR_CHG 2 2.224900 1.112450\n' 
+<-| b'+LSR_CHG 2 2.486400 1.243200\n' 
+<-| b'+LSR_CHG 2 2.636400 1.318200\n' 
+<-| b'+LSR_CHG 1 2.636400 1.318200\n' 
 ```
